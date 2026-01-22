@@ -8,6 +8,13 @@ compose-sync pulls changes from a git repository containing Docker Compose files
 1. Have changed since the last pull
 2. Are assigned to the current host
 
+## How It Works
+
+1. **Host Detection**: The tool uses the system hostname to identify the current host
+2. **Stack Assignment**: Reads `inventory.yml` to determine which stacks should be deployed on this host
+3. **Change Detection**: Compares git commits before and after pulling to find changed stacks
+4. **Selective Deployment**: Only deploys stacks that both changed AND are assigned to this host
+
 ## Repository Structure
 
 Your git repository should have the following structure:
@@ -34,7 +41,12 @@ hosts:
     - nextcloud
 ```
 
-This format is compatible with Ansible inventory structures and provides a centralized view of all host assignments.
+## Requirements
+
+- Go 1.21 or later
+- Git
+- Docker and Docker Compose
+- A git repository with the structure described above
 
 ## Installation
 
@@ -83,7 +95,9 @@ To see what would be deployed without actually deploying:
 ./compose-sync -config /path/to/config.yml
 ```
 
-### Systemd Service and Timer (Automatic Execution)
+## Automatic Execution
+
+### Systemd Service and Timer
 
 To run compose-sync automatically using systemd:
 
@@ -121,19 +135,18 @@ To run compose-sync automatically using systemd:
 
 The timer will run compose-sync every 5 minutes. To change the interval, edit `compose-sync.timer` and modify the `OnUnitActiveSec` value.
 
-## How It Works
+### Cron Job (Alternative)
 
-1. **Host Detection**: The tool uses the system hostname to identify the current host
-2. **Stack Assignment**: Reads `inventory.yml` to determine which stacks should be deployed on this host
-3. **Change Detection**: Compares git commits before and after pulling to find changed stacks
-4. **Selective Deployment**: Only deploys stacks that both changed AND are assigned to this host
+To run compose-sync using cron instead of systemd:
 
-## Requirements
-
-- Go 1.21 or later
-- Git
-- Docker and Docker Compose
-- A git repository with the structure described above
+1. **Install the cron job**:
+   ```bash
+   crontab -e
+   ```
+   Then add the desired crontab job, for example (every 5min, defaults, logging):
+   ```bash
+   */5 * * * * /usr/local/bin/compose-sync >> /var/log/compose-sync.log 2>&1
+   ```
 
 ## License
 
