@@ -83,6 +83,44 @@ To see what would be deployed without actually deploying:
 ./compose-sync -config /path/to/config.yml
 ```
 
+### Systemd Service and Timer (Automatic Execution)
+
+To run compose-sync automatically using systemd:
+
+1. **Install the binary** (if not already installed):
+   ```bash
+   sudo cp compose-sync /usr/local/bin/
+   ```
+
+2. **Edit the service file** (`compose-sync.service`):
+   - Replace `youruser` with the actual user that should run compose-sync (make sure this user has the correct permissions)
+   - Adjust paths if needed (binary location, config file, etc.)
+
+3. **Copy the service and timer files**:
+   ```bash
+   sudo cp compose-sync.service compose-sync.timer /etc/systemd/system/
+   ```
+
+4. **Reload systemd and enable the timer**:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable compose-sync.timer
+   sudo systemctl start compose-sync.timer
+   ```
+
+5. **Check status**:
+   ```bash
+   sudo systemctl status compose-sync.timer
+   sudo systemctl status compose-sync.service
+   ```
+
+6. **View logs**:
+   ```bash
+   sudo journalctl -u compose-sync.service -f
+   ```
+
+The timer will run compose-sync every 5 minutes. To change the interval, edit `compose-sync.timer` and modify the `OnUnitActiveSec` value.
+
 ## How It Works
 
 1. **Host Detection**: The tool uses the system hostname to identify the current host

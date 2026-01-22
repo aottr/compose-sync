@@ -1,0 +1,12 @@
+[Unit]
+Description=Run compose-sync every 5 minutes
+Requires=compose-sync.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+

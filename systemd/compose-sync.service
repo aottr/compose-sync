@@ -1,0 +1,17 @@
+[Unit]
+Description=compose-sync - Sync and deploy Docker Compose stacks from git
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Replace 'youruser' with the actual user that should run compose-sync
+User=youruser
+# Path to compose-sync binary (adjust if installed elsewhere)
+# If config.yml is not in the default location, add: -config /path/to/config.yml
+ExecStart=/usr/local/bin/compose-sync
+Environment="HOME=/home/youruser"
+WorkingDirectory=/home/youruser
+StandardOutput=journal
+StandardError=journal
+
