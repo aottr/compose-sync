@@ -13,8 +13,9 @@ import (
 )
 
 type config struct {
-	RepoURL  string `yaml:"repo_url"`
-	RepoPath string `yaml:"repo_path"`
+	RepoURL     string `yaml:"repo_url"`
+	RepoPath    string `yaml:"repo_path"`
+	Concurrency int    `yaml:"concurrency"`
 }
 
 func loadConfig(path string) (*config, error) {
@@ -30,6 +31,10 @@ func loadConfig(path string) (*config, error) {
 
 	if cfg.RepoPath == "" {
 		return nil, fmt.Errorf("repo_path is required in config")
+	}
+
+	if cfg.Concurrency <= 0 {
+		cfg.Concurrency = 3 // Safe default for Docker
 	}
 
 	return &cfg, nil

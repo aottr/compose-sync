@@ -1,4 +1,5 @@
 # Configuration file for compose-sync
 repo_url: "git@github.com:user/compose-repo.git"  # Optional: URL for cloning (not used if repo_path already exists)
 repo_path: "/path/to/local/repo"  # Required: Local path to the git repository
+concurrency: 3  # Optional: Number of concurrent deployments (default: 3)
 

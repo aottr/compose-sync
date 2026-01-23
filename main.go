@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sync"
 )
 
 func main() {
@@ -79,17 +80,34 @@ func main() {
 		return
 	}
 
-	// Deploy each stack
-	for _, stack := range stacksToDeploy {
-		composePath := filepath.Join(cfg.RepoPath, "stacks", stack, "compose.yml")
-		if _, err := os.Stat(composePath); os.IsNotExist(err) {
-			composePath = filepath.Join(cfg.RepoPath, "stacks", stack, "compose.yaml")
-		}
-		fmt.Printf("Deploying stack: %s\n", stack)
-		if err := deployStack(composePath); err != nil {
-			log.Printf("Failed to deploy stack %s: %v", stack, err)
-			continue
-		}
-		fmt.Printf("Successfully deployed stack: %s\n", stack)
+	deployStacks(cfg.RepoPath, stacksToDeploy, cfg.Concurrency)
+}
+
+func deployStacks(repoPath string, stacks []string, concurrency int) {
+	// Create a semaphore channel to limit concurrency
+	semaphore := make(chan struct{}, concurrency)
+	var wg sync.WaitGroup
+
+	for _, stack := range stacks {
+		wg.Add(1)
+		go func(stack string) {
+			defer wg.Done()
+
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			composePath := filepath.Join(repoPath, "stacks", stack, "compose.yml")
+			if _, err := os.Stat(composePath); os.IsNotExist(err) {
+				composePath = filepath.Join(repoPath, "stacks", stack, "compose.yaml")
+			}
+
+			fmt.Printf("Deploying stack: %s\n", stack)
+			if err := deployStack(composePath); err != nil {
+				log.Printf("Failed to deploy stack %s: %v", stack, err)
+				return
+			}
+			fmt.Printf("Successfully deployed stack: %s\n", stack)
+		}(stack)
 	}
+	wg.Wait()
 }
