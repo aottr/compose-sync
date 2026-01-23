@@ -37,17 +37,17 @@ func main() {
 	}
 	fmt.Printf("Detected host: %s\n", currentHost)
 
-	assignedStacks, err := getAssignedStacks(cfg.RepoPath, currentHost)
-	if err != nil {
-		log.Fatalf("Failed to get assigned stacks: %v", err)
-	}
-	fmt.Printf("Stacks assigned to this host: %v\n", assignedStacks)
-
 	fmt.Println("Pulling git repository...")
 	changedStacks, err := pullAndDetectChanges(cfg.RepoPath)
 	if err != nil {
 		log.Fatalf("Failed to pull or detect changes: %v", err)
 	}
+
+	assignedStacks, err := getAssignedStacks(cfg.RepoPath, currentHost)
+	if err != nil {
+		log.Fatalf("Failed to get assigned stacks: %v", err)
+	}
+	fmt.Printf("Stacks assigned to this host: %v\n", assignedStacks)
 
 	if len(changedStacks) == 0 {
 		fmt.Println("No changes detected.")

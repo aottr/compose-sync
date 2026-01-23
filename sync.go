@@ -75,17 +75,25 @@ func getAssignedStacks(repoPath, hostname string) ([]string, error) {
 
 	data, err := os.ReadFile(inventoryFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read inventory file %s: %w", inventoryFile, err)
+		return []string{}, fmt.Errorf("failed to read inventory file %s: %w", inventoryFile, err)
 	}
 
 	var inv inventory
 	if err := yaml.Unmarshal(data, &inv); err != nil {
-		return nil, fmt.Errorf("failed to parse inventory file %s: %w", inventoryFile, err)
+		return []string{}, fmt.Errorf("failed to parse inventory file %s: %w", inventoryFile, err)
+	}
+
+	if inv.Hosts == nil {
+		return []string{}, fmt.Errorf("inventory file %s has no 'hosts' key", inventoryFile)
 	}
 
 	stacks, exists := inv.Hosts[hostname]
 	if !exists {
 		return []string{}, nil // Host not in inventory, no stacks assigned
+	}
+
+	if stacks == nil {
+		return []string{}, nil
 	}
 
 	return stacks, nil
