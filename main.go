@@ -12,7 +12,6 @@ import (
 
 func main() {
 	configPath := flag.String("config", "config.yml", "Path to configuration file")
-	dryRun := flag.Bool("dry-run", false, "Show what would be deployed without actually deploying")
 	flag.Parse()
 
 	cfg, err := loadConfig(*configPath)
@@ -38,8 +37,8 @@ func main() {
 	}
 	fmt.Printf("Detected host: %s\n", currentHost)
 
-	fmt.Println("Pulling git repository...")
-	changedStacks, err := pullAndDetectChanges(cfg.RepoPath)
+	fmt.Printf("Pulling git repository (branch: %s)...\n", cfg.Branch)
+	changedStacks, err := pullAndDetectChanges(cfg.RepoPath, cfg.Branch)
 	if err != nil {
 		log.Fatalf("Failed to pull or detect changes: %v", err)
 	}
@@ -71,14 +70,6 @@ func main() {
 	}
 
 	fmt.Printf("Stacks to deploy: %v\n", stacksToDeploy)
-
-	if *dryRun {
-		fmt.Println("DRY RUN: Would deploy the following stacks:")
-		for _, stack := range stacksToDeploy {
-			fmt.Printf("  - %s\n", stack)
-		}
-		return
-	}
 
 	deployStacks(cfg.RepoPath, stacksToDeploy, cfg.Concurrency)
 }

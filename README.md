@@ -81,14 +81,6 @@ This will:
 - Find changed stacks
 - Deploy only changed stacks assigned to this host
 
-### Dry Run
-
-To see what would be deployed without actually deploying:
-
-```bash
-./compose-sync -dry-run
-```
-
 ### Custom Config Path
 
 ```bash

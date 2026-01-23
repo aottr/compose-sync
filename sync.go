@@ -15,6 +15,7 @@ import (
 type config struct {
 	RepoURL     string `yaml:"repo_url"`
 	RepoPath    string `yaml:"repo_path"`
+	Branch      string `yaml:"branch"`
 	Concurrency int    `yaml:"concurrency"`
 }
 
@@ -31,6 +32,13 @@ func loadConfig(path string) (*config, error) {
 
 	if cfg.RepoPath == "" {
 		return nil, fmt.Errorf("repo_path is required in config")
+	}
+
+	if cfg.Branch == "" {
+		cfg.Branch = detectCurrentBranch(cfg.RepoPath)
+		if cfg.Branch == "" {
+			cfg.Branch = "main"
+		}
 	}
 
 	if cfg.Concurrency <= 0 {
@@ -104,7 +112,17 @@ func getAssignedStacks(repoPath, hostname string) ([]string, error) {
 	return stacks, nil
 }
 
-func pullAndDetectChanges(repoPath string) ([]string, error) {
+func detectCurrentBranch(repoPath string) string {
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	cmd.Dir = repoPath
+	output, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
+}
+
+func pullAndDetectChanges(repoPath, branch string) ([]string, error) {
 	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("repository path does not exist: %s", repoPath)
 	}
@@ -118,7 +136,7 @@ func pullAndDetectChanges(repoPath string) ([]string, error) {
 		return nil, fmt.Errorf("failed to get previous HEAD: %w", err)
 	}
 
-	if err := gitPull(repoPath); err != nil {
+	if err := gitFetchPull(repoPath, branch); err != nil {
 		return nil, fmt.Errorf("failed to pull: %w", err)
 	}
 
@@ -140,8 +158,25 @@ func pullAndDetectChanges(repoPath string) ([]string, error) {
 	return changedStacks, nil
 }
 
-func gitPull(repoPath string) error {
-	cmd := exec.Command("git", "pull")
+func gitFetchPull(repoPath, branch string) error {
+	cmd := exec.Command("git", "fetch", "origin", branch)
+	cmd.Dir = repoPath
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git fetch failed: %w", err)
+	}
+
+	cmd = exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	cmd.Dir = repoPath
+	currentBranch, _ := cmd.Output()
+	if strings.TrimSpace(string(currentBranch)) != branch {
+		cmd = exec.Command("git", "checkout", branch)
+		cmd.Dir = repoPath
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("git checkout failed: %w", err)
+		}
+	}
+
+	cmd = exec.Command("git", "pull", "origin", branch)
 	cmd.Dir = repoPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
