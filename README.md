@@ -50,11 +50,17 @@ hosts:
 
 ## Installation
 
+### Using Go Install
+
 ```bash
 go install github.com/aottr/compose-sync@latest
 ```
 
-#### Alternatively build from source
+### Using Pre-built Binaries
+
+Download the latest release from the [Releases page](https://github.com/aottr/compose-sync/releases).
+
+### Build from Source
 
 1. Clone this repository
 2. Build the application:

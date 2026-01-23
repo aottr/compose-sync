@@ -31,5 +31,11 @@ go.work.sum
 # .idea/
 .vscode/
 
+# Binaries
 compose-sync
+dist/
+
+# Config
 config.yml
+
+!cmd/compose-sync/

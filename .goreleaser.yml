@@ -1,0 +1,41 @@
+version: 2
+
+project_name: compose-sync
+
+builds:
+  - id: compose-sync
+    main: ./cmd/compose-sync
+    binary: compose-sync
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/aottr/compose-sync/internal/version.Version={{.Version}}
+      - -X github.com/aottr/compose-sync/internal/version.Commit={{.Commit}}
+      - -X github.com/aottr/compose-sync/internal/version.BuildDate={{.Date}}
+
+archives:
+  - id: default
+    files:
+      - README.md
+      - LICENSE
+      - config.yml.example
+      - systemd/*
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+release:
+  github:
+    owner: aottr
+    name: compose-sync
