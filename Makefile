@@ -30,8 +30,8 @@ major:
 		NEW_VERSION="$$(($$MAJOR + 1)).0.0"; \
 	fi; \
 	echo "Bumping major version: $$CURRENT -> $$NEW_VERSION"; \
-	git -c tag.gpgSign=false tag -a "v$$NEW_VERSION" -m "Release v$$NEW_VERSION" || git tag "v$$NEW_VERSION"; \
-	echo "Created tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
+	git tag -s "v$$NEW_VERSION" -m "Release v$$NEW_VERSION"; \
+	echo "Created signed tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
 
 minor:
 	@CURRENT="$(CURRENT_TAG)"; \
@@ -43,8 +43,8 @@ minor:
 		NEW_VERSION="$$MAJOR.$$(($$MINOR + 1)).0"; \
 	fi; \
 	echo "Bumping minor version: $$CURRENT -> $$NEW_VERSION"; \
-	git -c tag.gpgSign=false tag -a "v$$NEW_VERSION" -m "Release v$$NEW_VERSION" || git tag "v$$NEW_VERSION"; \
-	echo "Created tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
+	git tag -s "v$$NEW_VERSION" -m "Release v$$NEW_VERSION"; \
+	echo "Created signed tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
 
 patch:
 	@CURRENT="$(CURRENT_TAG)"; \
@@ -57,5 +57,5 @@ patch:
 		NEW_VERSION="$$MAJOR.$$MINOR.$$(($$PATCH + 1))"; \
 	fi; \
 	echo "Bumping patch version: $$CURRENT -> $$NEW_VERSION"; \
-	git -c tag.gpgSign=false tag -a "v$$NEW_VERSION" -m "Release v$$NEW_VERSION" || git tag "v$$NEW_VERSION"; \
-	echo "Created tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
+	git tag -s "v$$NEW_VERSION" -m "Release v$$NEW_VERSION"; \
+	echo "Created signed tag v$$NEW_VERSION. Push with: git push origin v$$NEW_VERSION"
